@@ -1,0 +1,83 @@
+# Import the necessary libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Create a DataFrame with your data
+# dependent_varible = no of accidents(y)
+# independent_variable(factors that influence accident severity) = "Injuries (X1)," "Deaths (X2)," "2W (X3)," and "Car (X4).
+data = {
+    'No of Accidents (Y)': [46, 44, 24, 48, 51, 40, 38, 28, 28, 31, 25, 33],
+    'Injuries (X1)': [25, 20, 11, 27, 37, 17, 27, 25, 15, 21, 12, 31],
+    'Deaths (X2)': [5, 6, 3, 9, 10, 7, 12, 2, 1, 4, 3, 3],
+    '2W (X3)': [21, 22, 28, 6, 25, 18, 24, 15, 19, 10, 22, 20],
+    'Car (X4)': [9, 15, 6, 12, 12, 10, 8, 9, 11, 5, 15, 9]
+}
+
+df = pd.DataFrame(data)
+
+# Define the coefficients
+a0 = 42.60123582
+a1 = 0.010202044
+a2 = 7.23865e-13
+a3 = 1.008517612
+a4 = 3.26086e-09
+
+# Calculate the predicted values Yg
+df['Predicted (Yg)'] = a0 + a1 * df['Injuries (X1)'] ** 2 + a2 * df['Deaths (X2)'] ** 2 + a3 * df['2W (X3)'] ** 2
+
+# Calculate SSR (Sum of Squares of Regression) and SSE (Sum of Squares of Error)
+SST = ((df['No of Accidents (Y)'] - df['No of Accidents (Y)'].mean()) ** 2).sum()
+SSR = ((df['Predicted (Yg)'] - df['No of Accidents (Y)'].mean()) ** 2).sum()
+SSE = ((df['No of Accidents (Y)'] - df['Predicted (Yg)']) ** 2).sum()
+
+# Calculate R^2
+R_squared = SSR / SST
+
+# Print the results
+print(f'Sum of Squares of Regression (SSR): {SSR}')
+print(f'Sum of Squares of Error (SSE): {SSE}')
+print(f'Total Sum of Squares (SST): {SST}')
+print(f'Coefficient of Determination (R^2): {R_squared}')
+
+# Visualize the results
+plt.scatter(df['No of Accidents (Y)'], df['Predicted (Yg)'])
+plt.xlabel('Actual No of Accidents')
+plt.ylabel('Predicted No of Accidents')
+plt.title('Actual vs. Predicted No of Accidents')
+
+# Calculate and plot the best-fit line
+m, b = np.polyfit(df['No of Accidents (Y)'], df['Predicted (Yg)'], 1)
+plt.plot(df['No of Accidents (Y)'], m * df['No of Accidents (Y)'] + b, color='green', label=f'Best Line Fit (y = {m:.2f}x + {b:.2f})')
+
+
+plt.legend()
+plt.grid()
+plt.show()
+
+# MAKE PREDICTIONS AND VISUALIZE
+# Hypothetical data
+hypothetical_data = {
+    'Injuries (X1)': [20, 10, 30],  # Modify these values as needed
+    'Deaths (X2)': [2, 4, 6],      # Modify these values as needed
+    '2W (X3)': [24, 17, 25],      # Modify these values as needed
+    'Car (X4)': [12, 18, 10]       # Modify these values as needed
+}
+
+hypothetical_df = pd.DataFrame(hypothetical_data)
+
+# Create a figure with subplots
+fig, axs = plt.subplots(2, 2, figsize=(12, 8))
+
+# Calculate and plot best-fit lines for each variable
+for i, var in enumerate(hypothetical_df.columns):
+    m, b = np.polyfit(hypothetical_df[var], a0 + a1 * hypothetical_df['Injuries (X1)'] ** 1 + a2 * hypothetical_df['Deaths (X2)'] ** 1 + a3 * hypothetical_df['2W (X3)'] ** 1 + a4 * hypothetical_df['Car (X4)'] ** 1, 1)
+    axs[i // 2, i % 2].scatter(hypothetical_df[var], a0 + a1 * hypothetical_df['Injuries (X1)'] ** 1 + a2 * hypothetical_df['Deaths (X2)'] ** 1 + a3 * hypothetical_df['2W (X3)'] ** 1 + a4 * hypothetical_df['Car (X4)'] ** 1, label=f'Accident Predictions (Yg)')
+    axs[i // 2, i % 2].set_xlabel(var)
+    axs[i // 2, i % 2].set_ylabel('Predicted No of Accidents')
+    axs[i // 2, i % 2].plot(hypothetical_df[var], m * hypothetical_df[var] + b, color='green', label=f'Best Line Fit (y = {m:.2f}x + {b:.2f})')
+    axs[i // 2, i % 2].legend()
+    axs[i // 2, i % 2].grid()
+
+plt.tight_layout()
+plt.show()
