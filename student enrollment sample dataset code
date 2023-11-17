@@ -1,0 +1,52 @@
+# Generate a sample dataset
+data = {
+    'gender': ['Male', 'Female', 'Male', 'Female', 'Male', 'Female', 'Male', 'Female'],
+    'ethnicity': ['Asian', 'Caucasian', 'African American', 'Caucasian', 'Asian', 'African American', 'Caucasian', 'Asian'],
+    'age': [20, 22, 21, 23, 22, 24, 20, 25],
+    'hours_studied': [10, 12, 15, 13, 14, 11, 16, 10],
+    'enrolled': [1, 0, 1, 0, 1, 1, 0, 1]  # Assuming '1' means enrolled and '0' means not enrolled
+}
+
+df = pd.DataFrame(data)
+
+# Define features (X) and target variable (y)
+X = df.drop('enrolled', axis=1)
+y = df['enrolled']
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Define categorical features for one-hot encoding
+categorical_features = ['gender', 'ethnicity']
+
+# Create preprocessor to handle categorical features
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('cat', OneHotEncoder(), categorical_features)
+    ],
+    remainder='passthrough'
+)
+
+# Create a Random Forest classifier
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+
+# Create a pipeline with the preprocessor and the model
+pipeline = Pipeline(steps=[('preprocessor', preprocessor),
+                             ('model', model)])
+
+# Train the model
+pipeline.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_pred = pipeline.predict(X_test)
+
+# Evaluate the model
+accuracy = accuracy_score(y_test, y_pred)
+print(f'Accuracy: {accuracy:.2f}')
+
+# Display classification report
+print(classification_report(y_test, y_pred))
+
+# Assuming 'df' is your DataFrame
+df.to_csv('dataset.csv', index=False)
+
